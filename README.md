@@ -1,2 +1,3 @@
 # Jornada_HashTag
- Jornada python Lira
+
+[Certificado de Conclusão](./Certificate/Validação%20Certificado.pdf)
