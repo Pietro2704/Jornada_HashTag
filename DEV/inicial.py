@@ -1,89 +1,66 @@
-# importa biblioteca frontEnd
 import flet as ft
 
-# função main
 def main(pagina):
   
-  # Cria título
-  txt = ft.Text("Aoooba!!")
-  
-  # Criar um chat
-  chat = ft.Column()
-  
-  # Pegar nome do usuario do PopUp
-  nome_user = ft.TextField(
-    label="Escreva seu nome:"
-  )
-  
-  # Função do chat
-  def enviarMensagem(evento):
-    texto_labelMsg = f"{nome_user.value}: {labelMsg.value}"
-    chat.controls.append(ft.Text(texto_labelMsg))
-    labelMsg.value = ""
+  def entrar_popup(evento):
+    pagina.dialog = popUp
+    popUp.open = True
     pagina.update()
-  
-  # Campos do chat
-  labelMsg = ft.TextField(label="Escreva sua mensagem:")
-  btnMsg = ft.ElevatedButton("Enviar", on_click=enviarMensagem)
-  
-  # Função do botão no PopUp
-  def entrar(evento): 
     
-    popUp.open = False # Fecha PopUp
-    pagina.remove(btn_init) # Remove botão inicial
-    texto = f"{nome_user.value} entrou no chat"
-    chat.controls.append(texto)
-    
-    # Colocar campos do chat em linha
-    campo_mensagens = ft.Row([
-      labelMsg,
-      btnMsg
-    ])
-    
+  def iniciar_chat(evento):
+    popUp.open = False
+    pagina.remove(btn_init)
+    msg = f"{nome_user.value} entrou no chat"
+    pagina.pubsub.send_all(msg)
     pagina.add(campo_mensagens)
     pagina.add(chat)
     pagina.update()
     
-  # Criar PopUp
-  popUp = ft.AlertDialog(
-    open=False, 
-    modal=True, 
-    title=ft.Text("Bem vindo ao Zapis Zapis"),
-    content=nome_user,
-    actions=[
-      ft.ElevatedButton("Entrar", on_click=entrar)
-      ]
-    )
-  
-  # Funçao botão inicial
-  def iniciarChat(evento):
-    pagina.dialog = popUp 
-    popUp.open = True 
-    pagina.update() 
+  def enviar_mensagem(evento):
+    usuario = nome_user.value
+    mensagem = f"{usuario}: {label_mensagem.value}"
+    pagina.pubsub.send_all(mensagem)
+    label_mensagem.value = ""
+    pagina.update()
+    
+  def passar_tunel(info):
+    chat.controls.append(ft.Text(info))
+    pagina.update()
     
   
   
-  
-  
-  pagina.add(txt)
-  btn_init = ft.ElevatedButton("Iniciar chat", on_click=iniciarChat)
+  # Parte inicial
+  title = ft.Text("HashZaps")
+  pagina.add(title)
+  btn_init = ft.ElevatedButton("Iniciar chat", on_click=entrar_popup)
   pagina.add(btn_init)
   
+  # PopUp
+  nome_user = ft.TextField(label="Escreva seu nome", on_submit=iniciar_chat)
+  popUp = ft.AlertDialog(
+    open = False,
+    modal = True,
+    title = ft.Text("Bem vindo ao Zapis Zapis"),
+    content = nome_user,
+    actions = [
+      ft.ElevatedButton("Entrar", on_click=iniciar_chat)
+      ]
+  )
+  
+  # Chat
+  chat = ft.Column()
+  label_mensagem = ft.TextField(label="Escreva algo aqui:", on_submit=enviar_mensagem)
+  btn_enviar = ft.ElevatedButton("Enviar", on_click=enviar_mensagem)
+  campo_mensagens = ft.Row([
+    label_mensagem, btn_enviar
+  ])
+  
+  # Criar um Túnel
+  pagina.pubsub.subscribe(passar_tunel)
   
   
   
   
+  pagina.update()
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-ft.app(main)
+ft.app(main, view=ft.WEB_BROWSER)
